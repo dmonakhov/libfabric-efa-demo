@@ -1,6 +1,8 @@
 CXX       = g++
-CXXFLAGS  = -Wall -Werror -std=c++17 -march=native -O2 -g -Ibuild/libfabric/include -I/usr/local/cuda/include
-LDFLAGS   = -Lbuild/libfabric/lib -L/usr/local/cuda/lib64
+LIBFABRIC_HOME ?= build/libfabric
+CUDA_HOME ?= /usr/local/cuda
+CXXFLAGS  = -Wall -Werror -std=c++17 -march=native -O2 -g -I$(LIBFABRIC_HOME)/include -I$(CUDA_HOME)/include
+LDFLAGS   = -L$(LIBFABRIC_HOME)/lib -L$(CUDA_HOME)/lib64
 LDLIBS    = -lfabric -lpthread -lcudart -lcuda
 BINARIES  = build/4_hello \
 			build/5_reverse \
@@ -15,7 +17,7 @@ BINARIES  = build/4_hello \
 			build/14_batch \
 			build/15_lazy
 
-export LD_LIBRARY_PATH := $(PWD)/build/libfabric/lib:$(LD_LIBRARY_PATH)
+export LD_LIBRARY_PATH := $(PWD)/$(LIBFABRIC_HOME)/lib:$(LD_LIBRARY_PATH)
 
 .PHONY: all clean
 
@@ -24,5 +26,5 @@ all: $(BINARIES)
 clean:
 	rm -rf $(BINARIES)
 
-build/%: src/%.cpp build/libfabric/lib/libfabric.so
+build/%: src/%.cpp $(LIBFABRIC_HOME)/lib/libfabric.so
 	$(CXX) $(CXXFLAGS) -o $@ $< $(LDFLAGS) $(LDLIBS)
